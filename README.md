@@ -1,27 +1,23 @@
 Purpose
 =======
-A _minimal_ zero dependency logger for GCP Cloud Run
+A _minimal_ zero dependency logger for Google Cloud Platform/Stackdriver
 
 Usage
 =====
 ```
 package main
 
-import "github.com/karl-gustav/runlogger"
+import (
+	"os"
+	"github.com/karl-gustav/runlogger"
+)
 
 var log *runlogger.Logger
 func init() {
-	serviceName := os.Getenv("K_SERVICE")
-	revision := os.Getenv("K_REVISION")
-	configuration := os.Getenv("K_CONFIGURATION")
-	var err error
-	if serviceName != "" { // Check if running on localhost
-        log, err = runlogger.CloudRunLogger(serviceName, revision, configuration)
-        if err != nil {
-                panic("not able to generate logger because of " + err.Error())
-        }
+	if os.Getenv("K_SERVICE") != "" { // Check if running in cloud run
+		log= runlogger.StructuredLogger()
 	} else {
-        log = runlogger.LocalLogger()
+		log = runlogger.PlainLogger()
 	}
 }
 
