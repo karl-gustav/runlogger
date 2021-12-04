@@ -23,5 +23,7 @@ func init() {
 
 func main() {
 	log.Info("Hello", "world")
+	log.Infof("Hello %s", "world")
+	log.Infoj(struct{ Hello string }{"world"})
 }
 ```
