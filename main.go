@@ -100,35 +100,35 @@ func (l *Logger) Emergencyf(format string, v ...interface{}) {
 }
 
 func (l *Logger) Debugj(message string, obj interface{}) {
-	l.writeJson(debug_severety, message, l.objToJson(obj))
+	l.writeJson(debug_severety, message, obj)
 }
 
 func (l *Logger) Infoj(message string, obj interface{}) {
-	l.writeJson(info_severety, message, l.objToJson(obj))
+	l.writeJson(info_severety, message, obj)
 }
 
 func (l *Logger) Noticej(message string, obj interface{}) {
-	l.writeJson(notice_severety, message, l.objToJson(obj))
+	l.writeJson(notice_severety, message, obj)
 }
 
 func (l *Logger) Warningj(message string, obj interface{}) {
-	l.writeJson(warning_severety, message, l.objToJson(obj))
+	l.writeJson(warning_severety, message, obj)
 }
 
 func (l *Logger) Errorj(message string, obj interface{}) {
-	l.writeJson(error_severety, message, l.objToJson(obj))
+	l.writeJson(error_severety, message, obj)
 }
 
 func (l *Logger) Criticalj(message string, obj interface{}) {
-	l.writeJson(critical_severety, message, l.objToJson(obj))
+	l.writeJson(critical_severety, message, obj)
 }
 
 func (l *Logger) Alertj(message string, obj interface{}) {
-	l.writeJson(alert_severety, message, l.objToJson(obj))
+	l.writeJson(alert_severety, message, obj)
 }
 
 func (l *Logger) Emergencyj(message string, obj interface{}) {
-	l.writeJson(emergency_severety, message, l.objToJson(obj))
+	l.writeJson(emergency_severety, message, obj)
 }
 
 func (l *Logger) writeLog(severety severety, message string) {
@@ -154,15 +154,16 @@ func (l *Logger) writeLog(severety severety, message string) {
 	}
 }
 
-func (l *Logger) writeJson(severety severety, message string, jsonBytes []byte) {
+func (l *Logger) writeJson(severety severety, message string, obj interface{}) {
 	pc, file, line, _ := runtime.Caller(2)
 	if l == nil {
-		fmt.Printf("%s in [%s:%d]:\n%s\n", severety, file, line, string(jsonBytes))
+		j, _ := json.Marshal(obj)
+		fmt.Printf("%s in [%s:%d]:\n%s\n", severety, file, line, j)
 		return
 	}
 
 	payload := &stackdriverLogStruct{
-		JsonPayload: string(jsonBytes),
+		JsonPayload: obj,
 		TextPayload: message,
 		Severity:    severety,
 		Timestamp:   time.Now(),
@@ -178,19 +179,10 @@ func (l *Logger) writeJson(severety severety, message string, jsonBytes []byte) 
 	}
 }
 
-func (l *Logger) objToJson(obj interface{}) []byte {
-	b, err := json.Marshal(obj)
-	if err != nil {
-		l.Criticalf("got error %v when marshaling %+v\n", err, obj)
-		return []byte{}
-	}
-	return b
-}
-
 // stackdriverLogStruct source https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry
 type stackdriverLogStruct struct {
 	TextPayload    string          `json:"message,omitempty"`
-	JsonPayload    string          `json:"jsonPayload,omitempty"`
+	JsonPayload    interface{}     `json:"jsonPayload,omitempty"`
 	Severity       severety        `json:"severity"`
 	Timestamp      time.Time       `json:"timestamp`
 	SourceLocation *sourceLocation `json:"sourceLocation,omitempty"`
