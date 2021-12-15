@@ -99,36 +99,36 @@ func (l *Logger) Emergencyf(format string, v ...interface{}) {
 	l.writeLog(emergency_severety, fmt.Sprintf(format, v...))
 }
 
-func (l *Logger) Debugj(obj interface{}) {
-	l.writeJson(debug_severety, l.objToJson(obj))
+func (l *Logger) Debugj(message string, obj interface{}) {
+	l.writeJson(debug_severety, message, l.objToJson(obj))
 }
 
-func (l *Logger) Infoj(obj interface{}) {
-	l.writeJson(info_severety, l.objToJson(obj))
+func (l *Logger) Infoj(message string, obj interface{}) {
+	l.writeJson(info_severety, message, l.objToJson(obj))
 }
 
-func (l *Logger) Noticej(obj interface{}) {
-	l.writeJson(notice_severety, l.objToJson(obj))
+func (l *Logger) Noticej(message string, obj interface{}) {
+	l.writeJson(notice_severety, message, l.objToJson(obj))
 }
 
-func (l *Logger) Warningj(obj interface{}) {
-	l.writeJson(warning_severety, l.objToJson(obj))
+func (l *Logger) Warningj(message string, obj interface{}) {
+	l.writeJson(warning_severety, message, l.objToJson(obj))
 }
 
-func (l *Logger) Errorj(obj interface{}) {
-	l.writeJson(error_severety, l.objToJson(obj))
+func (l *Logger) Errorj(message string, obj interface{}) {
+	l.writeJson(error_severety, message, l.objToJson(obj))
 }
 
-func (l *Logger) Criticalj(obj interface{}) {
-	l.writeJson(critical_severety, l.objToJson(obj))
+func (l *Logger) Criticalj(message string, obj interface{}) {
+	l.writeJson(critical_severety, message, l.objToJson(obj))
 }
 
-func (l *Logger) Alertj(obj interface{}) {
-	l.writeJson(alert_severety, l.objToJson(obj))
+func (l *Logger) Alertj(message string, obj interface{}) {
+	l.writeJson(alert_severety, message, l.objToJson(obj))
 }
 
-func (l *Logger) Emergencyj(obj interface{}) {
-	l.writeJson(emergency_severety, l.objToJson(obj))
+func (l *Logger) Emergencyj(message string, obj interface{}) {
+	l.writeJson(emergency_severety, message, l.objToJson(obj))
 }
 
 func (l *Logger) writeLog(severety severety, message string) {
@@ -154,7 +154,7 @@ func (l *Logger) writeLog(severety severety, message string) {
 	}
 }
 
-func (l *Logger) writeJson(severety severety, jsonBytes []byte) {
+func (l *Logger) writeJson(severety severety, message string, jsonBytes []byte) {
 	pc, file, line, _ := runtime.Caller(2)
 	if l == nil {
 		fmt.Printf("%s in [%s:%d]:\n%s\n", severety, file, line, string(jsonBytes))
@@ -163,6 +163,7 @@ func (l *Logger) writeJson(severety severety, jsonBytes []byte) {
 
 	payload := &stackdriverLogStruct{
 		JsonPayload: string(jsonBytes),
+		TextPayload: message,
 		Severity:    severety,
 		Timestamp:   time.Now(),
 		SourceLocation: &sourceLocation{
