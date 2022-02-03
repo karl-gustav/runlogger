@@ -23,6 +23,8 @@ const (
 	emergency_severety severety = "EMERGENCY" // One or more systems are unusable.)
 )
 
+const trunkateMessage = "[message over 100Kb, truncating]..."
+
 type Logger struct{}
 
 // StructuredLogger is used to have structured logging in stackdriver (Google Cloud Platform)
@@ -160,6 +162,11 @@ func (l *Logger) writeJson(severety severety, message string, obj interface{}) {
 		j, _ := json.Marshal(obj)
 		fmt.Printf("%s in [%s:%d]:\n%s\n", severety, file, line, j)
 		return
+	}
+
+	// GCP has max 102400 bytes limit, so setting 100k for message and 2.4k for other fields
+	if len(message) > 100000 {
+		message = message[0:100000-len(trunkateMessage)] + trunkateMessage
 	}
 
 	payload := &stackdriverLogStruct{
