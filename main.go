@@ -23,7 +23,7 @@ const (
 	emergency_severety severety = "EMERGENCY" // One or more systems are unusable.)
 )
 
-const trunkateMessage = "[message over 100Kb, truncating]..."
+const maxSize = 102400
 
 type Logger struct{}
 
@@ -150,9 +150,15 @@ func (l *Logger) writeLog(severety severety, message string) {
 			Line:     strconv.Itoa(line),
 		},
 	}
-	err := json.NewEncoder(os.Stdout).Encode(payload)
+	j, err := json.Marshal(payload)
 	if err != nil {
 		panic("could not log TextPayload because of err: " + err.Error())
+	}
+
+	if len(j) >= maxSize {
+		l.Errorf("log entry exeed max size of %d bytes: %.100000s", maxSize, j)
+	} else {
+		os.Stdout.Write(j)
 	}
 }
 
@@ -162,11 +168,6 @@ func (l *Logger) writeJson(severety severety, message string, obj interface{}) {
 		j, _ := json.Marshal(obj)
 		fmt.Printf("%s in [%s:%d]:\n%s\n", severety, file, line, j)
 		return
-	}
-
-	// GCP has max 102400 bytes limit, so setting 100k for message and 2.4k for other fields
-	if len(message) > 100000 {
-		message = message[0:100000-len(trunkateMessage)] + trunkateMessage
 	}
 
 	payload := &stackdriverLogStruct{
@@ -180,9 +181,15 @@ func (l *Logger) writeJson(severety severety, message string, obj interface{}) {
 			Line:     strconv.Itoa(line),
 		},
 	}
-	err := json.NewEncoder(os.Stdout).Encode(payload)
+	j, err := json.Marshal(payload)
 	if err != nil {
 		panic("could not log JsonPayload because of err: " + err.Error())
+	}
+
+	if len(j) >= maxSize {
+		l.Errorf("log entry exeed max size of %d bytes: %.100000s", maxSize, j)
+	} else {
+		os.Stdout.Write(j)
 	}
 }
 
