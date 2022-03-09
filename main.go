@@ -1,6 +1,7 @@
 package runlogger
 
 import (
+	"bufio"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -25,6 +26,8 @@ const (
 
 const maxSize = 102400
 
+var stdout = bufio.NewWriter(os.Stdout)
+
 type Logger struct{}
 
 // StructuredLogger is used to have structured logging in stackdriver (Google Cloud Platform)
@@ -38,135 +41,110 @@ func PlainLogger() *Logger {
 }
 
 func (l *Logger) Debug(v ...interface{}) {
-	l.writeLog(debug_severety, fmt.Sprint(v...))
+	l.writeLog(debug_severety, fmt.Sprint(v...), nil)
 }
 
 func (l *Logger) Info(v ...interface{}) {
-	l.writeLog(info_severety, fmt.Sprint(v...))
+	l.writeLog(info_severety, fmt.Sprint(v...), nil)
 }
 
 func (l *Logger) Notice(v ...interface{}) {
-	l.writeLog(notice_severety, fmt.Sprint(v...))
+	l.writeLog(notice_severety, fmt.Sprint(v...), nil)
 }
 
 func (l *Logger) Warning(v ...interface{}) {
-	l.writeLog(warning_severety, fmt.Sprint(v...))
+	l.writeLog(warning_severety, fmt.Sprint(v...), nil)
 }
 
 func (l *Logger) Error(v ...interface{}) {
-	l.writeLog(error_severety, fmt.Sprint(v...))
+	l.writeLog(error_severety, fmt.Sprint(v...), nil)
 }
 
 func (l *Logger) Critical(v ...interface{}) {
-	l.writeLog(critical_severety, fmt.Sprint(v...))
+	l.writeLog(critical_severety, fmt.Sprint(v...), nil)
 }
 
 func (l *Logger) Alert(v ...interface{}) {
-	l.writeLog(alert_severety, fmt.Sprint(v...))
+	l.writeLog(alert_severety, fmt.Sprint(v...), nil)
 }
 
 func (l *Logger) Emergency(v ...interface{}) {
-	l.writeLog(emergency_severety, fmt.Sprint(v...))
+	l.writeLog(emergency_severety, fmt.Sprint(v...), nil)
 }
 
 func (l *Logger) Debugf(format string, v ...interface{}) {
-	l.writeLog(debug_severety, fmt.Sprintf(format, v...))
+	l.writeLog(debug_severety, fmt.Sprintf(format, v...), nil)
 }
 
 func (l *Logger) Infof(format string, v ...interface{}) {
-	l.writeLog(info_severety, fmt.Sprintf(format, v...))
+	l.writeLog(info_severety, fmt.Sprintf(format, v...), nil)
 }
 
 func (l *Logger) Noticef(format string, v ...interface{}) {
-	l.writeLog(notice_severety, fmt.Sprintf(format, v...))
+	l.writeLog(notice_severety, fmt.Sprintf(format, v...), nil)
 }
 
 func (l *Logger) Warningf(format string, v ...interface{}) {
-	l.writeLog(warning_severety, fmt.Sprintf(format, v...))
+	l.writeLog(warning_severety, fmt.Sprintf(format, v...), nil)
 }
 
 func (l *Logger) Errorf(format string, v ...interface{}) {
-	l.writeLog(error_severety, fmt.Sprintf(format, v...))
+	l.writeLog(error_severety, fmt.Sprintf(format, v...), nil)
 }
 
 func (l *Logger) Criticalf(format string, v ...interface{}) {
-	l.writeLog(critical_severety, fmt.Sprintf(format, v...))
+	l.writeLog(critical_severety, fmt.Sprintf(format, v...), nil)
 }
 
 func (l *Logger) Alertf(format string, v ...interface{}) {
-	l.writeLog(alert_severety, fmt.Sprintf(format, v...))
+	l.writeLog(alert_severety, fmt.Sprintf(format, v...), nil)
 }
 
 func (l *Logger) Emergencyf(format string, v ...interface{}) {
-	l.writeLog(emergency_severety, fmt.Sprintf(format, v...))
+	l.writeLog(emergency_severety, fmt.Sprintf(format, v...), nil)
 }
 
 func (l *Logger) Debugj(message string, obj interface{}) {
-	l.writeJson(debug_severety, message, obj)
+	l.writeLog(debug_severety, message, obj)
 }
 
 func (l *Logger) Infoj(message string, obj interface{}) {
-	l.writeJson(info_severety, message, obj)
+	l.writeLog(info_severety, message, obj)
 }
 
 func (l *Logger) Noticej(message string, obj interface{}) {
-	l.writeJson(notice_severety, message, obj)
+	l.writeLog(notice_severety, message, obj)
 }
 
 func (l *Logger) Warningj(message string, obj interface{}) {
-	l.writeJson(warning_severety, message, obj)
+	l.writeLog(warning_severety, message, obj)
 }
 
 func (l *Logger) Errorj(message string, obj interface{}) {
-	l.writeJson(error_severety, message, obj)
+	l.writeLog(error_severety, message, obj)
 }
 
 func (l *Logger) Criticalj(message string, obj interface{}) {
-	l.writeJson(critical_severety, message, obj)
+	l.writeLog(critical_severety, message, obj)
 }
 
 func (l *Logger) Alertj(message string, obj interface{}) {
-	l.writeJson(alert_severety, message, obj)
+	l.writeLog(alert_severety, message, obj)
 }
 
 func (l *Logger) Emergencyj(message string, obj interface{}) {
-	l.writeJson(emergency_severety, message, obj)
+	l.writeLog(emergency_severety, message, obj)
 }
 
-func (l *Logger) writeLog(severety severety, message string) {
+func (l *Logger) writeLog(severety severety, message string, obj interface{}) {
 	pc, file, line, _ := runtime.Caller(2)
 	if l == nil {
-		fmt.Printf("%s in [%s:%d]: %s\n", severety, file, line, message)
-		return
-	}
-
-	payload := &stackdriverLogStruct{
-		TextPayload: message,
-		Severity:    severety,
-		Timestamp:   time.Now(),
-		SourceLocation: &sourceLocation{
-			File:     file,
-			Function: runtime.FuncForPC(pc).Name(),
-			Line:     strconv.Itoa(line),
-		},
-	}
-	j, err := json.Marshal(payload)
-	if err != nil {
-		panic("could not log TextPayload because of err: " + err.Error())
-	}
-
-	if len(j) >= maxSize {
-		l.Errorf("log entry exeed max size of %d bytes: %.100000s", maxSize, j)
-	} else {
-		os.Stdout.Write(j)
-	}
-}
-
-func (l *Logger) writeJson(severety severety, message string, obj interface{}) {
-	pc, file, line, _ := runtime.Caller(2)
-	if l == nil {
-		j, _ := json.Marshal(obj)
-		fmt.Printf("%s in [%s:%d]:\n%s\n", severety, file, line, j)
+		if obj != nil {
+			j, _ := json.Marshal(obj)
+			fmt.Printf("%s in [%s:%d]: %s\n%s\n", severety, file, line, message, j)
+		} else {
+			fmt.Printf("%s in [%s:%d]: %s\n", severety, file, line, message)
+		}
 		return
 	}
 
@@ -183,13 +161,14 @@ func (l *Logger) writeJson(severety severety, message string, obj interface{}) {
 	}
 	j, err := json.Marshal(payload)
 	if err != nil {
-		panic("could not log JsonPayload because of err: " + err.Error())
+		panic("could not log because of err: " + err.Error())
 	}
 
 	if len(j) >= maxSize {
 		l.Errorf("log entry exeed max size of %d bytes: %.100000s", maxSize, j)
 	} else {
-		os.Stdout.Write(j)
+		defer stdout.Flush()
+		stdout.Write(j)
 	}
 }
 
