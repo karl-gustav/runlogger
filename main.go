@@ -167,8 +167,7 @@ func (l *Logger) writeLog(severety severety, message string, obj interface{}) {
 	if len(j) >= maxSize {
 		l.Errorf("log entry exeed max size of %d bytes: %.100000s", maxSize, j)
 	} else {
-		defer stdout.Flush()
-		stdout.Write(j)
+		fmt.Printf("%s\n", j)
 	}
 }
 
