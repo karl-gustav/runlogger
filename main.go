@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 	"runtime"
 	"strconv"
 	"time"
@@ -30,14 +31,23 @@ var stdout = bufio.NewWriter(os.Stdout)
 
 type Logger struct{}
 
+var prefixPath string
+
 // StructuredLogger is used to have structured logging in stackdriver (Google Cloud Platform)
 func StructuredLogger() *Logger {
+	setPrefixPath()
 	return &Logger{}
 }
 
 // PlainLogger is used when you are not in a cloud run environment
 func PlainLogger() *Logger {
+	setPrefixPath()
 	return nil
+}
+
+func setPrefixPath() {
+	_, fileName, _, _ := runtime.Caller(2)
+	prefixPath = filepath.Dir(fileName) + "/"
 }
 
 func (l *Logger) Debug(v ...interface{}) {
@@ -141,9 +151,9 @@ func (l *Logger) writeLog(severety severety, message string, obj interface{}) {
 	if l == nil {
 		if obj != nil {
 			j, _ := json.Marshal(obj)
-			fmt.Printf("%s in [%s:%d]: %s\n%s\n", severety, file, line, message, j)
+			fmt.Printf("%s in [%s:%d]: %s\n%s\n", severety, relative(file), line, message, j)
 		} else {
-			fmt.Printf("%s in [%s:%d]: %s\n", severety, file, line, message)
+			fmt.Printf("%s in [%s:%d]: %s\n", severety, relative(file), line, message)
 		}
 		return
 	}
@@ -154,7 +164,7 @@ func (l *Logger) writeLog(severety severety, message string, obj interface{}) {
 		Severity:    severety,
 		Timestamp:   time.Now(),
 		SourceLocation: &sourceLocation{
-			File:     file,
+			File:     relative(file),
 			Function: runtime.FuncForPC(pc).Name(),
 			Line:     strconv.Itoa(line),
 		},
@@ -169,6 +179,13 @@ func (l *Logger) writeLog(severety severety, message string, obj interface{}) {
 	} else {
 		fmt.Printf("%s\n", j)
 	}
+}
+
+func relative(path string) string {
+	if filepath.HasPrefix(path, prefixPath) {
+		return path[len(prefixPath):]
+	}
+	return path
 }
 
 // stackdriverLogStruct source https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry
