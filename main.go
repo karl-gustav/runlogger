@@ -51,35 +51,35 @@ func setPrefixPath() {
 }
 
 func (l *Logger) Debug(v ...interface{}) {
-	l.writeLog(debug_severety, fmt.Sprint(v...), nil)
+	l.writeLog(debug_severety, fmt.Sprintln(v...), nil)
 }
 
 func (l *Logger) Info(v ...interface{}) {
-	l.writeLog(info_severety, fmt.Sprint(v...), nil)
+	l.writeLog(info_severety, fmt.Sprintln(v...), nil)
 }
 
 func (l *Logger) Notice(v ...interface{}) {
-	l.writeLog(notice_severety, fmt.Sprint(v...), nil)
+	l.writeLog(notice_severety, fmt.Sprintln(v...), nil)
 }
 
 func (l *Logger) Warning(v ...interface{}) {
-	l.writeLog(warning_severety, fmt.Sprint(v...), nil)
+	l.writeLog(warning_severety, fmt.Sprintln(v...), nil)
 }
 
 func (l *Logger) Error(v ...interface{}) {
-	l.writeLog(error_severety, fmt.Sprint(v...), nil)
+	l.writeLog(error_severety, fmt.Sprintln(v...), nil)
 }
 
 func (l *Logger) Critical(v ...interface{}) {
-	l.writeLog(critical_severety, fmt.Sprint(v...), nil)
+	l.writeLog(critical_severety, fmt.Sprintln(v...), nil)
 }
 
 func (l *Logger) Alert(v ...interface{}) {
-	l.writeLog(alert_severety, fmt.Sprint(v...), nil)
+	l.writeLog(alert_severety, fmt.Sprintln(v...), nil)
 }
 
 func (l *Logger) Emergency(v ...interface{}) {
-	l.writeLog(emergency_severety, fmt.Sprint(v...), nil)
+	l.writeLog(emergency_severety, fmt.Sprintln(v...), nil)
 }
 
 func (l *Logger) Debugf(format string, v ...interface{}) {
