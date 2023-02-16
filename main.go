@@ -29,6 +29,8 @@ const (
 
 const maxSize = 102400
 
+var errorMessageType = "type.googleapis.com/google.devtools.clouderrorreporting.v1beta1.ReportedErrorEvent"
+
 var stdout = bufio.NewWriter(os.Stdout)
 
 type Logger struct{}
@@ -167,11 +169,18 @@ func (l *Logger) writeLog(severety severety, message string, obj interface{}) {
 		return
 	}
 
+	var messageType *string
+	switch severety {
+	case error_severety, critical_severety, alert_severety, emergency_severety:
+		messageType = &errorMessageType
+	}
+
 	payload := &stackdriverLogStruct{
 		JsonPayload: obj,
-		TextPayload: message,
+		Message:     message,
 		Severity:    severety,
 		Timestamp:   time.Now(),
+		Type:        messageType,
 		SourceLocation: &sourceLocation{
 			File:     relative(file),
 			Function: runtime.FuncForPC(pc).Name(),
@@ -199,11 +208,12 @@ func relative(path string) string {
 
 // stackdriverLogStruct source https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry
 type stackdriverLogStruct struct {
-	TextPayload    string          `json:"message,omitempty"`
+	Message        string          `json:"message"`
 	JsonPayload    interface{}     `json:"jsonPayload,omitempty"`
 	Severity       severety        `json:"severity"`
 	Timestamp      time.Time       `json:"timestamp"`
-	SourceLocation *sourceLocation `json:"sourceLocation,omitempty"`
+	SourceLocation *sourceLocation `json:"logging.googleapis.com/sourceLocation"`
+	Type           *string         `json:"@type,omitempty"`
 }
 type sourceLocation struct {
 	File     string `json:"file"`
