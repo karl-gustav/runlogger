@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
-	"io"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -151,28 +150,53 @@ func (l *Logger) Emergencyj(message string, obj interface{}) {
 }
 
 func (l *Logger) writeLog(severety severety, message string, obj interface{}) {
-	var output io.Writer
+	output := os.Stderr
+
+	var isError bool
 	switch severety {
 	case error_severety, critical_severety, alert_severety, emergency_severety:
-		output = os.Stderr
-	default:
-		output = os.Stdout
+		isError = true
 	}
+
 	pc, file, line, _ := runtime.Caller(2)
+
 	if l == nil {
 		if obj != nil {
 			j, _ := json.Marshal(obj)
-			fmt.Fprintf(output, "%s in [%s:%d]: %s\n%s\n", severety, relative(file), line, message, j)
+			fmt.Fprintf(
+				output,
+				"%s in [%s:%d]: %s\n%s\n",
+				severety,
+				relative(file),
+				line,
+				message,
+				j,
+			)
 		} else {
-			fmt.Fprintf(output, "%s in [%s:%d]: %s\n", severety, relative(file), line, message)
+			fmt.Fprintf(
+				output,
+				"%s in [%s:%d]: %s\n",
+				severety,
+				relative(file),
+				line,
+				message,
+			)
 		}
 		return
 	}
 
-	var messageType *string
-	switch severety {
-	case error_severety, critical_severety, alert_severety, emergency_severety:
+	var (
+		messageType    *string
+		serviceContext *ServiceContext
+	)
+	if isError {
+		output = os.Stderr
 		messageType = &errorMessageType
+	}
+	if os.Getenv("K_SERVICE") != "" {
+		serviceContext = &ServiceContext{
+			Service: os.Getenv("K_SERVICE"),
+		}
 	}
 
 	payload := &stackdriverLogStruct{
@@ -186,6 +210,7 @@ func (l *Logger) writeLog(severety severety, message string, obj interface{}) {
 			Function: runtime.FuncForPC(pc).Name(),
 			Line:     strconv.Itoa(line),
 		},
+		ServiceContext: serviceContext,
 	}
 	j, err := json.Marshal(payload)
 	if err != nil {
@@ -214,6 +239,10 @@ type stackdriverLogStruct struct {
 	Timestamp      time.Time       `json:"timestamp"`
 	SourceLocation *sourceLocation `json:"logging.googleapis.com/sourceLocation"`
 	Type           *string         `json:"@type,omitempty"`
+	ServiceContext *ServiceContext `json:"serviceContext,omitempty"`
+}
+type ServiceContext struct {
+	Service string `json:"service"`
 }
 type sourceLocation struct {
 	File     string `json:"file"`
