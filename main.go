@@ -54,102 +54,111 @@ func setPrefixPath() {
 }
 
 func (l *Logger) Debug(v ...interface{}) {
-	l.writeLog(debug_severety, strings.TrimSpace(fmt.Sprintln(v...)), nil)
+	l.writeLog(debug_severety, strings.TrimSpace(fmt.Sprintln(v...)))
 }
 
 func (l *Logger) Info(v ...interface{}) {
-	l.writeLog(info_severety, strings.TrimSpace(fmt.Sprintln(v...)), nil)
+	l.writeLog(info_severety, strings.TrimSpace(fmt.Sprintln(v...)))
 }
 
 func (l *Logger) Notice(v ...interface{}) {
-	l.writeLog(notice_severety, strings.TrimSpace(fmt.Sprintln(v...)), nil)
+	l.writeLog(notice_severety, strings.TrimSpace(fmt.Sprintln(v...)))
 }
 
 func (l *Logger) Warning(v ...interface{}) {
-	l.writeLog(warning_severety, strings.TrimSpace(fmt.Sprintln(v...)), nil)
+	l.writeLog(warning_severety, strings.TrimSpace(fmt.Sprintln(v...)))
 }
 
 func (l *Logger) Error(v ...interface{}) {
-	l.writeLog(error_severety, strings.TrimSpace(fmt.Sprintln(v...)), nil)
+	l.writeLog(error_severety, strings.TrimSpace(fmt.Sprintln(v...)))
 }
 
 func (l *Logger) Critical(v ...interface{}) {
-	l.writeLog(critical_severety, strings.TrimSpace(fmt.Sprintln(v...)), nil)
+	l.writeLog(critical_severety, strings.TrimSpace(fmt.Sprintln(v...)))
 }
 
 func (l *Logger) Alert(v ...interface{}) {
-	l.writeLog(alert_severety, strings.TrimSpace(fmt.Sprintln(v...)), nil)
+	l.writeLog(alert_severety, strings.TrimSpace(fmt.Sprintln(v...)))
 }
 
 func (l *Logger) Emergency(v ...interface{}) {
-	l.writeLog(emergency_severety, strings.TrimSpace(fmt.Sprintln(v...)), nil)
+	l.writeLog(emergency_severety, strings.TrimSpace(fmt.Sprintln(v...)))
 }
 
 func (l *Logger) Debugf(format string, v ...interface{}) {
-	l.writeLog(debug_severety, fmt.Sprintf(format, v...), nil)
+	l.writeLog(debug_severety, fmt.Sprintf(format, v...))
 }
 
 func (l *Logger) Infof(format string, v ...interface{}) {
-	l.writeLog(info_severety, fmt.Sprintf(format, v...), nil)
+	l.writeLog(info_severety, fmt.Sprintf(format, v...))
 }
 
 func (l *Logger) Noticef(format string, v ...interface{}) {
-	l.writeLog(notice_severety, fmt.Sprintf(format, v...), nil)
+	l.writeLog(notice_severety, fmt.Sprintf(format, v...))
 }
 
 func (l *Logger) Warningf(format string, v ...interface{}) {
-	l.writeLog(warning_severety, fmt.Sprintf(format, v...), nil)
+	l.writeLog(warning_severety, fmt.Sprintf(format, v...))
 }
 
 func (l *Logger) Errorf(format string, v ...interface{}) {
-	l.writeLog(error_severety, fmt.Sprintf(format, v...), nil)
+	l.writeLog(error_severety, fmt.Sprintf(format, v...))
 }
 
 func (l *Logger) Criticalf(format string, v ...interface{}) {
-	l.writeLog(critical_severety, fmt.Sprintf(format, v...), nil)
+	l.writeLog(critical_severety, fmt.Sprintf(format, v...))
 }
 
 func (l *Logger) Alertf(format string, v ...interface{}) {
-	l.writeLog(alert_severety, fmt.Sprintf(format, v...), nil)
+	l.writeLog(alert_severety, fmt.Sprintf(format, v...))
 }
 
 func (l *Logger) Emergencyf(format string, v ...interface{}) {
-	l.writeLog(emergency_severety, fmt.Sprintf(format, v...), nil)
+	l.writeLog(emergency_severety, fmt.Sprintf(format, v...))
 }
 
-func (l *Logger) Debugj(message string, obj interface{}) {
-	l.writeLog(debug_severety, message, obj)
+type Field struct {
+	Key   string
+	Value interface{}
 }
 
-func (l *Logger) Infoj(message string, obj interface{}) {
-	l.writeLog(info_severety, message, obj)
+func (l *Logger) Field(key string, field interface{}) *Field {
+	return &Field{key, field}
 }
 
-func (l *Logger) Noticej(message string, obj interface{}) {
-	l.writeLog(notice_severety, message, obj)
+func (l *Logger) Debugj(message string, fields ...*Field) {
+	l.writeLog(debug_severety, message, fields...)
 }
 
-func (l *Logger) Warningj(message string, obj interface{}) {
-	l.writeLog(warning_severety, message, obj)
+func (l *Logger) Infoj(message string, fields ...*Field) {
+	l.writeLog(info_severety, message, fields...)
 }
 
-func (l *Logger) Errorj(message string, obj interface{}) {
-	l.writeLog(error_severety, message, obj)
+func (l *Logger) Noticej(message string, fields ...*Field) {
+	l.writeLog(notice_severety, message, fields...)
 }
 
-func (l *Logger) Criticalj(message string, obj interface{}) {
-	l.writeLog(critical_severety, message, obj)
+func (l *Logger) Warningj(message string, fields ...*Field) {
+	l.writeLog(warning_severety, message, fields...)
 }
 
-func (l *Logger) Alertj(message string, obj interface{}) {
-	l.writeLog(alert_severety, message, obj)
+func (l *Logger) Errorj(message string, fields ...*Field) {
+	l.writeLog(error_severety, message, fields...)
 }
 
-func (l *Logger) Emergencyj(message string, obj interface{}) {
-	l.writeLog(emergency_severety, message, obj)
+func (l *Logger) Criticalj(message string, fields ...*Field) {
+	l.writeLog(critical_severety, message, fields...)
 }
 
-func (l *Logger) writeLog(severety severety, message string, obj interface{}) {
+func (l *Logger) Alertj(message string, fields ...*Field) {
+	l.writeLog(alert_severety, message, fields...)
+}
+
+func (l *Logger) Emergencyj(message string, fields ...*Field) {
+	l.writeLog(emergency_severety, message, fields...)
+}
+
+func (l *Logger) writeLog(severety severety, message string, fields ...*Field) {
 	output := os.Stderr
 
 	var isError bool
@@ -161,8 +170,8 @@ func (l *Logger) writeLog(severety severety, message string, obj interface{}) {
 	pc, file, line, _ := runtime.Caller(2)
 
 	if l == nil {
-		if obj != nil {
-			j, _ := json.Marshal(obj)
+		if len(fields) > 0 {
+			j, _ := json.Marshal(fields)
 			fmt.Fprintf(
 				output,
 				"%s in [%s:%d]: %s\n%s\n",
@@ -199,8 +208,16 @@ func (l *Logger) writeLog(severety severety, message string, obj interface{}) {
 		}
 	}
 
+	jPayload := map[string]interface{}{}
+	for _, field := range fields {
+		if field.Key == "message" {
+			field.Key = "_message_" // this is to prevent the main message from beeing overwritten
+		}
+		jPayload[field.Key] = field.Value
+	}
+
 	payload := &stackdriverLogStruct{
-		JsonPayload: obj,
+		JsonPayload: jPayload,
 		Message:     message,
 		Severity:    severety,
 		Timestamp:   time.Now(),
@@ -233,13 +250,13 @@ func relative(path string) string {
 
 // stackdriverLogStruct source https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry
 type stackdriverLogStruct struct {
-	Message        string          `json:"message"`
-	JsonPayload    interface{}     `json:"jsonPayload,omitempty"`
-	Severity       severety        `json:"severity"`
-	Timestamp      time.Time       `json:"timestamp"`
-	SourceLocation *sourceLocation `json:"logging.googleapis.com/sourceLocation"`
-	Type           *string         `json:"@type,omitempty"`
-	ServiceContext *ServiceContext `json:"serviceContext,omitempty"`
+	Message        string                 `json:"message"`
+	JsonPayload    map[string]interface{} `json:"jsonPayload,omitempty"`
+	Severity       severety               `json:"severity"`
+	Timestamp      time.Time              `json:"timestamp"`
+	SourceLocation *sourceLocation        `json:"logging.googleapis.com/sourceLocation"`
+	Type           *string                `json:"@type,omitempty"`
+	ServiceContext *ServiceContext        `json:"serviceContext,omitempty"`
 }
 type ServiceContext struct {
 	Service string `json:"service"`
