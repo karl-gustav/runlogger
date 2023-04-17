@@ -28,7 +28,7 @@ func main() {
 	// logged as "Hello world" with a an attached json
 	// structure called "struct": `{"Maximum","Effort"}`
 	wantAsJson := struct{ Maximum string }{"Effort"}
-	log.Info("Hello", log.Field("struct", wantAsJson), "world")
+	log.Info("Hello", "world", log.Field("struct", wantAsJson))
 
 	// also works on the formated log methods (e.g. Infof(...))
 	// the fields are just ignored for the formated string
