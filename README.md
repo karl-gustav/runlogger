@@ -35,3 +35,8 @@ func main() {
 	log.Infof("Hello %", log.Field("struct", wantAsJson), "world")
 }
 ```
+
+NB: The "anything" in `log.Field(<name>, anything)` is sent unchanged
+to the marshal function, i.e. if you need to show a byte string, you
+need to wrap it in `string()`.
+I.e. `log.Field("lorum", string(someBytes))`.
