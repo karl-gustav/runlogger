@@ -34,6 +34,15 @@ var stdout = bufio.NewWriter(os.Stdout)
 
 type Logger struct{}
 
+type Field struct {
+	Key   string
+	Value interface{}
+}
+
+func (l *Logger) Field(key string, field interface{}) *Field {
+	return &Field{key, field}
+}
+
 var prefixPath string
 
 // StructuredLogger is used to have structured logging in stackdriver (Google Cloud Platform)
@@ -54,111 +63,86 @@ func setPrefixPath() {
 }
 
 func (l *Logger) Debug(v ...interface{}) {
-	l.writeLog(debug_severety, strings.TrimSpace(fmt.Sprintln(v...)))
+	inputs, fields := extractFields(v)
+	l.writeLog(debug_severety, strings.TrimSpace(fmt.Sprintln(inputs...)), fields)
 }
 
 func (l *Logger) Info(v ...interface{}) {
-	l.writeLog(info_severety, strings.TrimSpace(fmt.Sprintln(v...)))
+	inputs, fields := extractFields(v)
+	l.writeLog(info_severety, strings.TrimSpace(fmt.Sprintln(inputs...)), fields)
 }
 
 func (l *Logger) Notice(v ...interface{}) {
-	l.writeLog(notice_severety, strings.TrimSpace(fmt.Sprintln(v...)))
+	inputs, fields := extractFields(v)
+	l.writeLog(notice_severety, strings.TrimSpace(fmt.Sprintln(inputs...)), fields)
 }
 
 func (l *Logger) Warning(v ...interface{}) {
-	l.writeLog(warning_severety, strings.TrimSpace(fmt.Sprintln(v...)))
+	inputs, fields := extractFields(v)
+	l.writeLog(warning_severety, strings.TrimSpace(fmt.Sprintln(inputs...)), fields)
 }
 
 func (l *Logger) Error(v ...interface{}) {
-	l.writeLog(error_severety, strings.TrimSpace(fmt.Sprintln(v...)))
+	inputs, fields := extractFields(v)
+	l.writeLog(error_severety, strings.TrimSpace(fmt.Sprintln(inputs...)), fields)
 }
 
 func (l *Logger) Critical(v ...interface{}) {
-	l.writeLog(critical_severety, strings.TrimSpace(fmt.Sprintln(v...)))
+	inputs, fields := extractFields(v)
+	l.writeLog(critical_severety, strings.TrimSpace(fmt.Sprintln(inputs...)), fields)
 }
 
 func (l *Logger) Alert(v ...interface{}) {
-	l.writeLog(alert_severety, strings.TrimSpace(fmt.Sprintln(v...)))
+	inputs, fields := extractFields(v)
+	l.writeLog(alert_severety, strings.TrimSpace(fmt.Sprintln(inputs...)), fields)
 }
 
 func (l *Logger) Emergency(v ...interface{}) {
-	l.writeLog(emergency_severety, strings.TrimSpace(fmt.Sprintln(v...)))
+	inputs, fields := extractFields(v)
+	l.writeLog(emergency_severety, strings.TrimSpace(fmt.Sprintln(inputs...)), fields)
 }
 
 func (l *Logger) Debugf(format string, v ...interface{}) {
-	l.writeLog(debug_severety, fmt.Sprintf(format, v...))
+	inputs, fields := extractFields(v)
+	l.writeLog(debug_severety, fmt.Sprintf(format, inputs...), fields)
 }
 
 func (l *Logger) Infof(format string, v ...interface{}) {
-	l.writeLog(info_severety, fmt.Sprintf(format, v...))
+	inputs, fields := extractFields(v)
+	l.writeLog(info_severety, fmt.Sprintf(format, inputs...), fields)
 }
 
 func (l *Logger) Noticef(format string, v ...interface{}) {
-	l.writeLog(notice_severety, fmt.Sprintf(format, v...))
+	inputs, fields := extractFields(v)
+	l.writeLog(notice_severety, fmt.Sprintf(format, inputs...), fields)
 }
 
 func (l *Logger) Warningf(format string, v ...interface{}) {
-	l.writeLog(warning_severety, fmt.Sprintf(format, v...))
+	inputs, fields := extractFields(v)
+	l.writeLog(warning_severety, fmt.Sprintf(format, inputs...), fields)
 }
 
 func (l *Logger) Errorf(format string, v ...interface{}) {
-	l.writeLog(error_severety, fmt.Sprintf(format, v...))
+	inputs, fields := extractFields(v)
+	l.writeLog(error_severety, fmt.Sprintf(format, inputs...), fields)
 }
 
 func (l *Logger) Criticalf(format string, v ...interface{}) {
-	l.writeLog(critical_severety, fmt.Sprintf(format, v...))
+	inputs, fields := extractFields(v)
+	l.writeLog(critical_severety, fmt.Sprintf(format, inputs...), fields)
 }
 
 func (l *Logger) Alertf(format string, v ...interface{}) {
-	l.writeLog(alert_severety, fmt.Sprintf(format, v...))
+	inputs, fields := extractFields(v)
+	l.writeLog(alert_severety, fmt.Sprintf(format, inputs...), fields)
 }
 
 func (l *Logger) Emergencyf(format string, v ...interface{}) {
-	l.writeLog(emergency_severety, fmt.Sprintf(format, v...))
+	inputs, fields := extractFields(v)
+	l.writeLog(emergency_severety, fmt.Sprintf(format, inputs...), fields)
 }
 
-type Field struct {
-	Key   string
-	Value interface{}
-}
-
-func (l *Logger) Field(key string, field interface{}) *Field {
-	return &Field{key, field}
-}
-
-func (l *Logger) Debugj(message string, fields ...*Field) {
-	l.writeLog(debug_severety, message, fields...)
-}
-
-func (l *Logger) Infoj(message string, fields ...*Field) {
-	l.writeLog(info_severety, message, fields...)
-}
-
-func (l *Logger) Noticej(message string, fields ...*Field) {
-	l.writeLog(notice_severety, message, fields...)
-}
-
-func (l *Logger) Warningj(message string, fields ...*Field) {
-	l.writeLog(warning_severety, message, fields...)
-}
-
-func (l *Logger) Errorj(message string, fields ...*Field) {
-	l.writeLog(error_severety, message, fields...)
-}
-
-func (l *Logger) Criticalj(message string, fields ...*Field) {
-	l.writeLog(critical_severety, message, fields...)
-}
-
-func (l *Logger) Alertj(message string, fields ...*Field) {
-	l.writeLog(alert_severety, message, fields...)
-}
-
-func (l *Logger) Emergencyj(message string, fields ...*Field) {
-	l.writeLog(emergency_severety, message, fields...)
-}
-
-func (l *Logger) writeLog(severety severety, message string, fields ...*Field) {
+func (l *Logger) writeLog(severety severety, message string, fields []*Field) {
 	output := os.Stderr
 
 	var isError bool
@@ -246,6 +230,17 @@ func relative(path string) string {
 		return path[len(prefixPath):]
 	}
 	return path
+}
+
+func extractFields(inputs []interface{}) (cleanInputs []interface{}, fields []*Field) {
+	for _, input := range inputs {
+		if field, ok := input.(*Field); ok {
+			fields = append(fields, field)
+		} else {
+			cleanInputs = append(cleanInputs, input)
+		}
+	}
+	return
 }
 
 // stackdriverLogStruct source https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry
